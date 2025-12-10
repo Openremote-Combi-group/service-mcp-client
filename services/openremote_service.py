@@ -26,8 +26,6 @@ class OpenRemoteService:
                 heartbeat_interval=heartbeat_interval
             )
         except Exception as e:
-            print("ERROR OPENREMOTE ERROR")
-            print(e)
             logger.error("Failed to connect to OpenRemote")
             logger.debug(e)
 

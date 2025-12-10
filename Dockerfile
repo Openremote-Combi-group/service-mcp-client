@@ -1,19 +1,40 @@
 FROM ghcr.io/astral-sh/uv:alpine AS app-builder
 
+# Setup a non-root user
+RUN groupadd --system --gid 999 nonroot \
+ && useradd --system --gid 999 --uid 999 --create-home nonroot
+
+# Install the project into `/app`
 WORKDIR /app
 
-# Copy dependency metadata (improves caching) and workspace layout
-COPY ./src/shared/pyproject.toml /app/shared/pyproject.toml
-COPY ./src/services/mcp-client-api/pyproject.toml /app/mcp-client-api/pyproject.toml
+# Enable bytecode compilation
+ENV UV_COMPILE_BYTECODE=1
 
-# Fix for the non existant app folder, not included for caching purposes.
-RUN mkdir /app/mcp-client-api/app
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
 
-# Install dependencies without full project sources
-RUN uv init
+# Omit development dependencies
+ENV UV_NO_DEV=1
 
-RUN uv add --no-install-project "shared @ ./shared"
-RUN uv add --no-install-project "mcp-client-api @ ./mcp-client-api"
+# Ensure installed tools can be executed out of the box
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+
+# Install the project's dependencies using the lockfile and settings
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project \
+
+
+# Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
+
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
+
 
 # ----------------------------------------------------------------------
 # This stage uses a Node image to download dependencies and compile the Vue app.
