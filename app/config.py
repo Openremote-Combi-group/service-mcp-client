@@ -11,19 +11,17 @@ class Config(BaseSettings):
     )
 
     app_debug: bool = False
-
     app_static_folder: str = 'static'
-
-    app_homepage_url: str = '/'
+    app_homepage_url: str = 'http://localhost:8421/'
 
     # database_url: PostgresDsn | MySQLDsn | MariaDBDsn
-    # database_prefix: str | None = 'ask_marc_'
+    # database_prefix: str | None = 'mcp_client_'
 
     openremote_url: HttpUrl
     openremote_client_id: str
     openremote_client_secret: str
     openremote_verify_ssl: bool = True
-    openremote_service_id: str = 'MCP-Client-API'
+    openremote_service_id: str = 'MCP-Client'
     openremote_heartbeat_interval: int = 30
 
     mcp_config: dict | None = None
@@ -31,8 +29,6 @@ class Config(BaseSettings):
 
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
-
-    base_url: str = '/'
 
     cors_allowed_domains: set[str] = set()
 

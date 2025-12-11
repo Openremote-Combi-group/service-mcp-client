@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
         verify_SSL=config.openremote_verify_ssl,
         service_schema=ExternalServiceSchema(
             serviceId=config.openremote_service_id,
-            label="Ask-Marc (MCP-Client)",
+            label="MCP-Client",
             homepageUrl=config.app_homepage_url,
             status="AVAILABLE",
         )
@@ -62,5 +62,3 @@ init_health(app)
 
 
 app.mount("/", StaticFiles(directory=config.app_static_folder, html=True), name="static")
-
-print(app.routes)
