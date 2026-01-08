@@ -1,2 +1,17 @@
 /// <reference types="vite/client" />
 /// <reference types="unplugin-vue-router/client" />
+
+interface ViteTypeOptions {
+  // By adding this line, you can make the type of ImportMetaEnv strict
+  // to disallow unknown keys.
+  // strictImportMetaEnv: unknown
+}
+
+interface ImportMetaEnv {
+  readonly VITE_APP_BACKEND_URL: string
+  // more env variables...
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

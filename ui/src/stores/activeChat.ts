@@ -19,7 +19,7 @@ export const useActiveChatStore = defineStore('activeChat', () => {
       activeChat.close()
     }
 
-    activeChat = new WebSocket('ws://localhost:8421/api/chat')
+    activeChat = new WebSocket(import.meta.env.VITE_APP_BACKEND_URL)
     connectionStatus.value = 'loading'
     streamingStatus.value = null
     errorMessage.value = null
@@ -108,7 +108,7 @@ export const useActiveChatStore = defineStore('activeChat', () => {
 
           newMessage.tool_calls[streamResponse.tool_id] = {
             name: streamResponse.name,
-            input: streamResponse.input,
+            input: {},
             id: streamResponse.tool_id,
           }
 

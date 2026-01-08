@@ -16,6 +16,8 @@ RUN npm install
 # Copy the rest of the application source code
 COPY ./ui .
 
+ENV VITE_APP_BACKEND_URL=/api/chat
+
 # Build the application for production.
 # The output (usually 'dist' or 'build') will contain the static HTML, CSS, and JS files.
 # The command below assumes your Vue CLI/Vite configuration outputs to a directory named 'dist'.

@@ -171,7 +171,7 @@ async def chat(websocket: WebSocket):
                     "tool_id": event["run_id"],
                     "type": "tool_start",
                     "name": event["name"],
-                    "input": event["data"].get("input")
+                    "input": {}
                 })
 
             elif kind == "on_tool_end":
@@ -180,7 +180,7 @@ async def chat(websocket: WebSocket):
                     "type": "tool_end",
                     "tool_id": event["run_id"],
                     "name": event["name"],
-                    "output": event["data"].get("output").content
+                    "output": {}
                 })
 
             # Add the AI's response to the messages list
