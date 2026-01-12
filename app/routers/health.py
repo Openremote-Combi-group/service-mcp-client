@@ -3,12 +3,12 @@ from httpx import HTTPStatusError
 from starlette.responses import JSONResponse
 
 from services.openremote_service import get_openremote_service
-from .config import config
+from app.config import config
 
-health_router = APIRouter()
+router = APIRouter()
 
 
-@health_router.get("/health")
+@router.get("/health")
 async def health():
     openremote_service = get_openremote_service()
 
@@ -18,7 +18,3 @@ async def health():
         return JSONResponse({"status": "unhealthy", "service_id": config.openremote_service_id, "error": "Failed to connect to OpenRemote"}, status_code=200)
 
     return JSONResponse({"status": "healthy", "service_id": config.openremote_service_id}, status_code=200)
-
-
-def init_health(app: FastAPI):
-    app.include_router(health_router, prefix='/api')

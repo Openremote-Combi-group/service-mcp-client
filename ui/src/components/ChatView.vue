@@ -15,7 +15,7 @@
           <div class="prompt">
             <PromptBox />
             <div class="d-flex">
-              <!--              <ModelSelector />-->
+              <ModelSelector />
             </div>
           </div>
         </div>

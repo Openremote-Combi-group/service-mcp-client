@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 
 from services.mcp_client import get_mcp_client_service
-from .config import config
+from app.config import config
 
 router = APIRouter()
 
@@ -22,6 +22,10 @@ MODEL_MAPPING = {
     'claude-3-5-sonnet-20241022': {'model': 'claude-3-5-sonnet-20241022', 'model_provider': 'anthropic'},
     'claude-3-5-haiku-20241022': {'model': 'claude-3-5-haiku-20241022', 'model_provider': 'anthropic'},
     'claude-3-opus-20240229': {'model': 'claude-3-opus-20240229', 'model_provider': 'anthropic'},
+    'gemini-3-pro': {'model': 'gemini-3-pro-preview', 'model_provider': 'google_genai'},
+    'gemini-3-flash': {'model': 'gemini-3-flash-preview', 'model_provider': 'google_genai'},
+    'gemini-2.5-pro': {'model': 'gemini-2.5-pro', 'model_provider': 'google_genai'},
+    'gemini-2.5-flash': {'model': 'gemini-2.5-flash', 'model_provider': 'google_genai'},
 }
 
 
@@ -45,7 +49,7 @@ async def chat(websocket: WebSocket):
         initial_message = await websocket.receive_json()
 
         if initial_message.get('type') == 'init':
-            selected_model = initial_message.get('model', 'gpt-4o')
+            selected_model = initial_message.get('model', 'gemini-3-flash')
 
             # Validate model exists
             if selected_model not in MODEL_MAPPING:
@@ -75,6 +79,15 @@ async def chat(websocket: WebSocket):
                     "content": "Anthropic API key is not configured. Please add ANTHROPIC_API_KEY to your environment variables."
                 })
                 print("Client error (Anthropic API key not configured)")
+                await websocket.close()
+                return
+
+            if model_config['model_provider'] == 'google' and not config.google_api_key:
+                await websocket.send_json({
+                    "type": "error",
+                    "content": "Google API key is not configured. Please add GOOGLE_API_KEY to your environment variables."
+                })
+                print("Client error (Google API key not configured)")
                 await websocket.close()
                 return
 
@@ -157,15 +170,24 @@ async def chat(websocket: WebSocket):
             if kind == "on_chat_model_stream":
                 chunk = event["data"]["chunk"]
                 if hasattr(chunk, "content") and chunk.content:
-                    accumulated_content += chunk.content
+                    text_chunk = ''
+
+                    if type(chunk.content) is list:
+                        text_chunk += chunk.content[-1]['text']
+                    else:
+                        text_chunk += chunk.content
+
+                    accumulated_content += text_chunk
+
                     await websocket.send_json({
                         "id": message_id,
                         "type": "token",
-                        "content": chunk.content
+                        "content": text_chunk
                     })
 
             # Stream tool calls and results
             elif kind == "on_tool_start":
+                print(event)
                 await websocket.send_json({
                     "id": message_id,
                     "tool_id": event["run_id"],
@@ -175,6 +197,7 @@ async def chat(websocket: WebSocket):
                 })
 
             elif kind == "on_tool_end":
+                print(event)
                 await websocket.send_json({
                     "id": message_id,
                     "type": "tool_end",

@@ -8,10 +8,9 @@ from openremote_client.schemas import ExternalServiceSchema
 
 from services.mcp_client import init_mcp_client_service
 from services.openremote_service import init_openremote_service
-from .chat import init_chat_api
 from .config import config
 from .cors import init_cors
-from .health import init_health
+from app.routers import init_routers
 
 
 # FastAPI lifespan
@@ -49,7 +48,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="OpenRemote Ask-Marc Service",
+    title="OpenRemote MCP client Service",
     description="MCP client integrated with OpenRemote",
     lifespan=lifespan
 )
@@ -57,8 +56,7 @@ app = FastAPI(
 
 
 init_cors(app)
-init_chat_api(app)
-init_health(app)
+init_routers(app)
 
 
 app.mount("/", StaticFiles(directory=config.app_static_folder, html=True), name="static")

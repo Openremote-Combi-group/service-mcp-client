@@ -29,6 +29,7 @@ class Config(BaseSettings):
 
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
+    google_api_key: str | None = None
 
     cors_allowed_domains: set[str] = set()
 
